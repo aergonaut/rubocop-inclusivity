@@ -1,5 +1,8 @@
 Inclusivity/Race:
-  Description: "Avoid racially charged language."
+  Description: >-
+    Suggests replacing racially-charged or insensitive language with more
+    accurate and inclusive words.
+  Reference: https://github.com/rails/rails/issues/33677
   Enabled: true
   Offenses:
     whitelist:
