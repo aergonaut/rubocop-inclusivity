@@ -13,6 +13,7 @@ module RuboCop
         config = Config.new(hash, path).tap(&:make_excludes_absolute)
         puts "configuration from #{path}" if ConfigLoader.debug?
         config = ConfigLoader.merge_with_default(config, path)
+        puts config if ConfigLoader.debug?
         ConfigLoader.instance_variable_set(:@default_configuration, config)
       end
     end

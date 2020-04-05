@@ -5,10 +5,14 @@ inherit_mode:
 require:
   - rubocop-performance
   - standard/cop/semantic_blocks
+  - rubocop-inclusivity
 
 inherit_gem:
   standard:
     - config/base.yml
+
+Inclusivity:
+  Enabled: true
 
 Naming/FileName:
   Exclude:
