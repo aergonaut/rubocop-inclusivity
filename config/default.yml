@@ -1,1 +1,17 @@
 # Write it!
+
+Inclusivity/Race:
+  Description: "Avoid racially charged language."
+  Enabled: true
+  VersionAdded: "0.82"
+  Offenses:
+    whitelist:
+      - allowlist
+      - passlist
+      - permitlist
+    blacklist:
+      - banlist
+      - blocklist
+      - denylist
+    slave:
+      - secondary

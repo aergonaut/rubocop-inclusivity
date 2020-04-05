@@ -1,3 +1,15 @@
+inherit_mode:
+  merge:
+    - Exclude
+
+require:
+  - rubocop-performance
+  - standard/cop/semantic_blocks
+
+inherit_gem:
+  standard:
+    - config/base.yml
+
 Naming/FileName:
- Exclude:
-   - lib/rubocop-inclusivity.rb
+  Exclude:
+    - lib/rubocop-inclusivity.rb

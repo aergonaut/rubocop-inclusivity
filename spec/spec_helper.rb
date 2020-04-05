@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'rubocop-inclusivity'
-require 'rubocop/rspec/support'
+require "rubocop-inclusivity"
+require "rubocop/rspec/support"
 
 RSpec.configure do |config|
   config.include RuboCop::RSpec::ExpectOffense
