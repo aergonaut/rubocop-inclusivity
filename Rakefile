@@ -1,5 +1,6 @@
 require "bundler/gem_tasks"
 require "rspec/core/rake_task"
+require "github_changelog_generator/task"
 
 RSpec::Core::RakeTask.new(:spec)
 
@@ -31,4 +32,9 @@ task :new_cop, [:cop] do |_task, args|
   generator.inject_config(config_file_path: "config/default.yml")
 
   puts generator.todo
+end
+
+GitHubChangelogGenerator::RakeTask.new :changelog do |config|
+  config.user = "aergonaut"
+  config.project = "rubocop-inclusivity"
 end
