@@ -13,5 +13,7 @@ Inclusivity/Race:
       - banlist
       - blocklist
       - denylist
+    master:
+      - primary
     slave:
       - secondary
