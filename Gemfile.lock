@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rubocop-inclusivity (0.1.0)
+    rubocop-inclusivity (1.0.0)
       rubocop
 
 GEM
@@ -97,4 +97,4 @@ DEPENDENCIES
   standard
 
 BUNDLED WITH
-   2.1.2
+   2.1.4
