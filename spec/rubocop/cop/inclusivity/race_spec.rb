@@ -226,6 +226,17 @@ RSpec.describe RuboCop::Cop::Inclusivity::Race, :config do
         RUBY
       end
 
+      specify "malformed" do
+        expect_offense(%q(
+          "blacklist \x94"
+          ^^^^^^^^^^^^^^^^ `blacklist [...]
+        ))
+
+        expect_correction(%(
+          "banlist "
+        ))
+      end
+
       specify "interpolated" do
         expect_no_offenses(%q(
           "foo#{bar}"

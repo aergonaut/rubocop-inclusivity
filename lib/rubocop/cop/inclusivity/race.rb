@@ -30,6 +30,7 @@ module RuboCop
         MSG = "`%s` may be insensitive. Consider alternatives: %s"
         PARTIAL = "partial"
         SINGLE_QUOTE = "'"
+        UTF_8 = "UTF-8"
 
         def simple_substitution(node)
           name, = *node
@@ -103,7 +104,8 @@ module RuboCop
           return DOUBLE_QUOTE if source[0] == DOUBLE_QUOTE
         end
 
-        def check(range, string)
+        def check(range, input)
+          string = input.to_s.encode(Encoding.find(UTF_8), {invalid: :replace, undef: :replace, replace: ""})
           alternatives = preferred_language(string)
           return unless alternatives
 
