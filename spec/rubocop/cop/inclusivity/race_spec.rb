@@ -7,12 +7,132 @@ RSpec.describe RuboCop::Cop::Inclusivity::Race, :config do
     {
       "Offenses" => {
         "whitelist" => ["allowlist", "passlist", "permitlist"],
-        "blacklist" => ["banlist", "blocklist", "denylist"]
+        "blacklist" => ["banlist", "blocklist", "denylist"],
+        "master" => ["primary", "main"],
+        "slave" => ["secondary", "replica"]
+      },
+      "Allowlist" => {
+        "mastercard": {
+          "partial" => false
+        },
+        "blob/master": {
+          "partial" => true
+        }
       }
     }
   end
 
+  describe "allowlist" do
+    describe "partial" do
+      it "does not add offenses to comments" do
+        expect_no_offenses(<<~RUBY)
+          # blob/master
+        RUBY
+
+        expect_no_offenses(<<~RUBY)
+          # https://github.com/aergonaut/rubocop-inclusivity/blob/master/foo/bar.rb
+        RUBY
+      end
+
+      it "does not add offenses to code" do
+        expect_no_offenses(<<~RUBY)
+          x = "blob/master"
+        RUBY
+
+        expect_no_offenses(<<~RUBY)
+          x = "https://github.com/aergonaut/rubocop-inclusivity/blob/master/foo/bar.rb"
+        RUBY
+      end
+
+      it "is case-insensitive" do
+        expect_no_offenses(<<~RUBY)
+          x = "BLOB/MASTER"
+        RUBY
+      end
+    end
+
+    describe "non-partial" do
+      describe "comments" do
+        it "does not add offenses to full matches" do
+          expect_no_offenses(<<~RUBY)
+            # providers like mastercard
+          RUBY
+        end
+
+        it "adds offenses to patial matches" do
+          expect_offense(<<~RUBY)
+            # dealers who are mastercarders
+                              ^^^^^^^^^^^^^ `mastercarders` may be insensitive. Consider alternatives: primarycarders, maincarders
+          RUBY
+        end
+      end
+
+      describe "code" do
+        it "does not add offenses to full matches" do
+          expect_no_offenses(<<~RUBY)
+            providers << "mastercard"
+          RUBY
+        end
+
+        it "does not add offenses to patial matches" do
+          expect_offense(<<~RUBY)
+            dealers << "mastercarder"
+                       ^^^^^^^^^^^^^^ `mastercarder` may be insensitive. Consider alternatives: primarycarder, maincarder
+          RUBY
+        end
+      end
+
+      it "is case-insensitive" do
+        expect_no_offenses(<<~RUBY)
+          providers << :MASTERCARD
+        RUBY
+      end
+    end
+  end
+
   describe "checks" do
+    describe "comments" do
+      specify "plain" do
+        expect_no_offenses(<<~RUBY)
+          # see more about foo here
+        RUBY
+
+        expect_offense(<<~RUBY)
+          # see more about blacklist here
+                           ^^^^^^^^^ `blacklist` may be insensitive. Consider alternatives: banlist, blocklist, denylist
+        RUBY
+
+        expect_correction(<<~RUBY)
+          # see more about banlist here
+        RUBY
+      end
+
+      specify "in the middle of the doc" do
+        expect_no_offenses(%(
+          class Foo
+            def bar
+            end
+
+            # see more about foo here
+            def baz
+            end
+          end
+        ))
+
+        expect_offense(%(
+          class Foo
+            def bar
+            end
+
+            # see more about blacklist here
+                             ^^^^^^^^^ `blacklist` may be insensitive. Consider alternatives: banlist, blocklist, denylist
+            def baz
+            end
+          end
+        ))
+      end
+    end
+
     specify "variables" do
       expect_no_offenses(<<~RUBY)
         banlist = 1

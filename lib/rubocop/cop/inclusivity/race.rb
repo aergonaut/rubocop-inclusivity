@@ -24,8 +24,11 @@ module RuboCop
         extend AutoCorrector
         include ActiveSupport::Inflector
 
+        ALLOWLIST = "Allowlist"
+        OFFENSES = "Offenses"
         DOUBLE_QUOTE = "\""
         MSG = "`%s` may be insensitive. Consider alternatives: %s"
+        PARTIAL = "partial"
         SINGLE_QUOTE = "'"
 
         def simple_substitution(node)
@@ -112,12 +115,33 @@ module RuboCop
 
         def preferred_language(word)
           exclusive_language_matcher.match(word) do |match|
+            next if allow?(word)
+
             offense = match[0].downcase
             alternatives = cop_config["Offenses"].fetch(offense)
             matcher = %r{#{offense}}i
 
             alternatives.map do |alternative|
               word.to_s.gsub(matcher) { |match| replace_match(match, alternative) }
+            end
+          end
+        end
+
+        def on_new_investigation
+          processed_source.comments.each do |comment|
+            start_position = comment.location.expression.to_range.first
+            comment.text.split(" ").each do |word|
+              alternatives = preferred_language(word)
+              next unless alternatives
+
+              buffer = @processed_source.buffer
+              end_position = start_position + word.to_s.size
+              range = Parser::Source::Range.new(buffer, start_position, end_position)
+              add_offense(range, message: format(MSG, word.to_s, alternatives.join(", "))) do |corrector|
+                corrector.replace(range, alternatives.first)
+              end
+            ensure
+              start_position += word.size + 1
             end
           end
         end
@@ -132,8 +156,18 @@ module RuboCop
           word
         end
 
+        def allow?(text)
+          allowlist.any? do |(allow, config)|
+            config.fetch(PARTIAL, false) ? text.to_s.match(%r{#{allow}}i) : text.to_s.downcase == allow.to_s.downcase
+          end
+        end
+
+        def allowlist
+          @_allowlist ||= cop_config[ALLOWLIST] || {}
+        end
+
         def exclusive_language_matcher
-          @_exclusive_language_matcher ||= %r{(#{cop_config["Offenses"].keys.join("|")})}i
+          @_exclusive_language_matcher ||= %r{(#{cop_config[OFFENSES].keys.join("|")})}i
         end
       end
     end
