@@ -72,7 +72,7 @@ module RuboCop
 
         def on_send(node)
           match_methods_and_variables(node) do |variable_name|
-            check(node.loc.selector, variable_name)
+            check(node.loc.selector, variable_name.to_s.delete_suffix("="))
           end
         end
 
@@ -89,7 +89,7 @@ module RuboCop
         # foo.bar.buz matches buz and bar
         # [foo] matches foo
         def_node_matcher :match_methods_and_variables, <<~PATTERN
-          (send _ $_)
+          (send _ $_ ...)
         PATTERN
 
         # Foo::Bar::BUZZ matches Foo, Bar and BUZZ

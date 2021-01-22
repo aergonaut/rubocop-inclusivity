@@ -413,6 +413,27 @@ RSpec.describe RuboCop::Cop::Inclusivity::Race, :config do
           RUBY
         end
 
+        specify "nested assignment" do
+          expect_no_offenses(<<~RUBY)
+            config.foo.bar_things = [
+              "localhost",
+            ]
+          RUBY
+
+          expect_offense(<<~RUBY)
+            config.foo.whitelisted_things = [
+                       ^^^^^^^^^^^^^^^^^^ `whitelisted_things` may be insensitive. Consider alternatives: allowlisted_things, passlisted_things, permitlisted_things
+              "localhost",
+            ]
+          RUBY
+
+          expect_correction(<<~RUBY)
+            config.foo.allowlisted_things = [
+              "localhost",
+            ]
+          RUBY
+        end
+
         specify "singleton" do
           expect_no_offenses(<<~RUBY)
             Foo.bar
