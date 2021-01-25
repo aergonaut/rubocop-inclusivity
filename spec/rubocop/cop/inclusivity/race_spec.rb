@@ -91,6 +91,71 @@ RSpec.describe RuboCop::Cop::Inclusivity::Race, :config do
   end
 
   describe "checks" do
+    specify "aliases" do
+      expect_no_offenses(<<~RUBY)
+        alias foo bar
+      RUBY
+
+      expect_offense(<<~RUBY)
+        alias blacklist bar
+              ^^^^^^^^^ `blacklist` may be insensitive. Consider alternatives: banlist, blocklist, denylist
+      RUBY
+
+      expect_correction(<<~RUBY)
+        alias banlist bar
+      RUBY
+    end
+
+    specify "blocks" do
+      expect_no_offenses(<<~RUBY)
+        foo do |bar, baz|
+        end
+      RUBY
+
+      expect_offense(<<~RUBY)
+        foo do |bar, blacklist|
+                     ^^^^^^^^^ `blacklist` may be insensitive. Consider alternatives: banlist, blocklist, denylist
+        end
+      RUBY
+
+      expect_correction(<<~RUBY)
+        foo do |bar, banlist|
+        end
+      RUBY
+    end
+
+    describe "class variables" do
+      specify "access" do
+        expect_no_offenses(<<~RUBY)
+          @@foo
+        RUBY
+
+        expect_offense(<<~RUBY)
+          @@blacklist
+          ^^^^^^^^^^^ `@@blacklist` may be insensitive. Consider alternatives: @@banlist, @@blocklist, @@denylist
+        RUBY
+
+        expect_correction(<<~RUBY)
+          @@banlist
+        RUBY
+      end
+
+      specify "assignment" do
+        expect_no_offenses(<<~RUBY)
+          @@foo = "bar"
+        RUBY
+
+        expect_offense(<<~RUBY)
+          @@blacklist = "bar"
+          ^^^^^^^^^^^ `@@blacklist` may be insensitive. Consider alternatives: @@banlist, @@blocklist, @@denylist
+        RUBY
+
+        expect_correction(<<~RUBY)
+          @@banlist = "bar"
+        RUBY
+      end
+    end
+
     describe "comments" do
       specify "plain" do
         expect_no_offenses(<<~RUBY)
@@ -193,6 +258,23 @@ RSpec.describe RuboCop::Cop::Inclusivity::Race, :config do
       expect_correction(<<~RUBY)
         :banlist
       RUBY
+    end
+
+    describe "hashes" do
+      specify "keys" do
+        expect_no_offenses(<<~RUBY)
+          { foo: "bar" }
+        RUBY
+
+        expect_offense(<<~RUBY)
+          { blacklist: "bar" }
+            ^^^^^^^^^ `blacklist` may be insensitive. Consider alternatives: banlist, blocklist, denylist
+        RUBY
+
+        expect_correction(<<~RUBY)
+          { banlist: "bar" }
+        RUBY
+      end
     end
 
     describe "strings" do

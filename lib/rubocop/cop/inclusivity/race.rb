@@ -30,6 +30,7 @@ module RuboCop
         MSG = "`%s` may be insensitive. Consider alternatives: %s"
         PARTIAL = "partial"
         SINGLE_QUOTE = "'"
+        SYMBOL = ":"
         UTF_8 = "UTF-8"
 
         def simple_substitution(node)
@@ -47,6 +48,7 @@ module RuboCop
         alias on_kwrestarg simple_substitution
         alias on_blockarg simple_substitution
         alias on_lvar simple_substitution
+        alias on_cvar simple_substitution
 
         def on_casgn(node)
           _parent, constant_name, _value = *node
@@ -55,7 +57,7 @@ module RuboCop
 
         def on_sym(node)
           name, = *node
-          check(node.source_range, name) { |replacement| ":#{replacement}" }
+          check(node.source_range, name) { |replacement| node.source[0] == SYMBOL ? ":#{replacement}" : replacement }
         end
 
         def on_str(node)
@@ -87,21 +89,17 @@ module RuboCop
 
         private
 
-        # foo.bar.buz matches buz and bar
-        # [foo] matches foo
         def_node_matcher :match_methods_and_variables, <<~PATTERN
           (send _ $_ ...)
         PATTERN
 
-        # Foo::Bar::BUZZ matches Foo, Bar and BUZZ
-        # class Foo < Bar; end matchest Foo and Bar
         def_node_matcher :match_consts, <<~PATTERN
           (const ... $_)
         PATTERN
 
         def determine_quote(source)
           return SINGLE_QUOTE if source[0] == SINGLE_QUOTE
-          return DOUBLE_QUOTE if source[0] == DOUBLE_QUOTE
+          DOUBLE_QUOTE if source[0] == DOUBLE_QUOTE
         end
 
         def check(range, input)
@@ -152,9 +150,9 @@ module RuboCop
           normalized_alternative = alternative.downcase
           return normalized_alternative if word.downcase == word
           return normalized_alternative.upcase if word.upcase == word
-          return underscore(normalized_alternative) if underscore(word) === word
-          return camelize(normalized_alternative) if camelize(word) === word
-          return camelize(normalized_alternative, false) if camelize(word, false) === word
+          return underscore(normalized_alternative) if underscore(word) == word
+          return camelize(normalized_alternative) if camelize(word) == word
+          return camelize(normalized_alternative, false) if camelize(word, false) == word
           word
         end
 
