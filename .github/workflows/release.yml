@@ -1,0 +1,39 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    env:
+      GEM_NAME: rubocop-inclusivity
+      VERSION_FILE: VERSION
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6.x
+      - name: Version
+        run: |
+          TAG_NAME=${GITHUB_REF##*/}
+          echo ${TAG_NAME:1} > $VERSION_FILE
+          gem install bundler
+          bundle config rubygems.pkg.github.com reverb-deploy-bot:${{ secrets.GITHUB_PACKAGE_PULL_TOKEN }}
+          bundle install --jobs 4 --retry 3
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add $VERSION_FILE Gemfile.lock
+          git commit -m "Bumping version to $TAG_NAME" --author "GitHub Action <actions@github.com>"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push
+        run: |
+          gem build ${GEM_NAME}.gemspec
+          echo -e "---\n:github: Bearer ${{ secrets.GITHUB_TOKEN }}" > ~/.gem/credentials
+          chmod 0600 ~/.gem/credentials
+          gem push --key github --host https://rubygems.pkg.github.com/reverbdotcom ${GEM_NAME}*.gem
