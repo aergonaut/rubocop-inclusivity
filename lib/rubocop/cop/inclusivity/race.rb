@@ -3,7 +3,7 @@
 module RuboCop
   module Cop
     module Inclusivity
-      # Detects potentially insensitive langugae used in variable names and
+      # Detects potentially insensitive language used in variable names and
       # suggests alternatives that promote inclusivity.
       #
       # The `Offenses` config parameter can be used to configure the cop with
