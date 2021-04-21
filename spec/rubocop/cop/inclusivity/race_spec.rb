@@ -243,6 +243,36 @@ RSpec.describe RuboCop::Cop::Inclusivity::Race, :config do
           FOO_BANLIST = ["foo", "bar"]
         RUBY
       end
+
+      specify "complex" do
+        expect_no_offenses(<<~RUBY)
+          FOO = ["foo"] - FOO_BANLIST
+        RUBY
+
+        expect_offense(<<~RUBY)
+          FOO = ["foo"] - FOO_BLACKLIST
+                          ^^^^^^^^^^^^^ `FOO_BLACKLIST` may be insensitive. Consider alternatives: FOO_BANLIST, FOO_BLOCKLIST, FOO_DENYLIST
+        RUBY
+
+        expect_correction(<<~RUBY)
+          FOO = ["foo"] - FOO_BANLIST
+        RUBY
+      end
+
+      specify "complex pascal casing" do
+        expect_no_offenses(<<~RUBY)
+          FOO = ["foo"] - FooBanlist
+        RUBY
+
+        expect_offense(<<~RUBY)
+          FOO = ["foo"] - FooBlacklist
+                          ^^^^^^^^^^^^ `FooBlacklist` may be insensitive. Consider alternatives: FooBanlist, FooBlocklist, FooDenylist
+        RUBY
+
+        expect_correction(<<~RUBY)
+          FOO = ["foo"] - FooBanlist
+        RUBY
+      end
     end
 
     specify "symbols" do

@@ -81,9 +81,7 @@ module RuboCop
 
         def on_const(node)
           match_consts(node) do |const_name|
-            check(node.loc.name, const_name) do |replacement|
-              classify(replacement)
-            end
+            check(node.loc.name, const_name)
           end
         end
 
