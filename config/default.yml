@@ -4,6 +4,7 @@ Inclusivity/Race:
     accurate and inclusive words.
   Reference: https://github.com/rails/rails/issues/33677
   Enabled: true
+  Allowlist:
   Offenses:
     whitelist:
       - allowlist
