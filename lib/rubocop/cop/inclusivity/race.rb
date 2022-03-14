@@ -101,7 +101,7 @@ module RuboCop
         end
 
         def check(range, input)
-          string = input.to_s.encode(Encoding.find(UTF_8), {invalid: :replace, undef: :replace, replace: ""})
+          string = input.to_s.encode(Encoding.find(UTF_8), invalid: :replace, undef: :replace, replace: "")
           alternatives = preferred_language(string)
           return unless alternatives
 
